@@ -1,0 +1,27 @@
+epochs =2
+batch_size = 32
+
+steps_per_epoch = padded_inputs.shape[0]/batch_size
+for epoch in range(epochs):
+    #tbar = tqdm(train_loader)
+
+    floss1 = floss2 = floss3 = 0
+    for step,sample in enumerate(train_loader):
+      
+      input_word = tf.convert_to_tensor([t.tolist() for t in sample['inp_word']])
+      input_veg = tf.convert_to_tensor([t.tolist() for t in sample['inp_veg']])
+      input_price = tf.convert_to_tensor([t.tolist() for t in sample['inp_price']])
+      out_word = tf.convert_to_tensor([t.tolist() for t in sample['out_word']])
+      out_veg = tf.convert_to_tensor([t.tolist() for t in sample['out_veg']])
+      out_price = tf.convert_to_tensor([t.tolist() for t in sample['out_price']])
+      
+      loss1,loss2,loss3,final_loss = train_step(model,(input_word,input_veg,input_price),[out_word,out_veg,out_price])
+      
+      floss1 += loss1
+      floss2 += loss2
+      floss3 += loss3
+      if step%1000==0:
+        print("Step: %d Task 1 Loss: %.4f Task 2 Loss: %.4f Task 3 Loss: %.4f Total Loss: %.4f"% (step,    float(loss1),float(loss2),float(loss3),float(final_loss)))
+        print("Seen so far: %s samples" % ((step + 1) * batch_size))
+    print("---------------------------------------------------------------")
+    print("Task 1 Loss: %.4f Task 2 Loss: %.4f Task 3 Loss: %.4f"% (float(floss1/steps_per_epoch),float(floss2/steps_per_epoch),float(floss3/steps_per_epoch)))
